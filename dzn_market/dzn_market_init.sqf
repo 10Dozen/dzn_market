@@ -12,6 +12,7 @@ dzn_market_cashSyncTimerDelay = 300;
 dzn_market_accountCash = call dzn_market_getCashSource;
 dzn_market_sellCoefficient = _this select 0;
 
+//marketBox = ;
 
 // ****************************************************
 //	END OF PARAMETERS OF DZN_MARKET
