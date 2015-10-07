@@ -38,7 +38,7 @@ player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerD
 			if !(player getVariable "dzn_market_arsenalOpened") then {
 				player setVariable ["dzn_market_arsenalOpened",true];
 				
-				player setVariable ["dzn_market_currentGear", player call dzn_fnc_gear_getGear];
+				player setVariable ["dzn_market_currentGear", player call dzn_fnc_gear_getPreciseGear];
 				player setVariable ["dzn_market_baseInv", (player call BIS_fnc_saveInventory) call dzn_fnc_convertInventoryToLine];
 			};
 			
@@ -54,10 +54,10 @@ player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerD
 		} else {
 			if (player getVariable "ArsenalOpened") then {
 				player setVariable ["dzn_market_arsenalOpened",false];				
-				player setVariable ["dzn_market_newGear", (player call dzn_fnc_gear_getGear)];
+				player setVariable ["dzn_market_newGear", (player call dzn_fnc_gear_getPreciseGear)];
 				
 				if !((player getVariable "dzn_market_currentGear") isEqualTo (player getVariable "dzn_market_newGear")) then {
-					[ player, player getVariable "dzn_market_currentGear" ] spawn dzn_fnc_gear_assignGear;					
+					[ player, player getVariable "dzn_market_currentGear" ] spawn dzn_fnc_gear_setPreciseGear;					
 					0 = createDialog "dzn_market_dialog";					
 				};				
 			};
