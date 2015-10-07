@@ -99,7 +99,7 @@ dzn_fnc_market_invTotals = {
 		}
 	];	
 
-	player setVariable ["ArsenalInventoryCost", (_addCost - _sellCost)];
+	player setVariable ["dzn_market_arsenalInventoryCost", (_addCost - _sellCost)];
 	hintSilent (composeText _stringsToShow);
 };
 
@@ -111,7 +111,7 @@ dzn_fnc_market_setPurchaseDialogText = {
 	_idc = 1100;	
 	_ctrl = _display displayCtrl _idc;
 	
-	_cost = player getVariable "ArsenalInventoryCost";	
+	_cost = player getVariable "dzn_market_arsenalInventoryCost";	
 	if (_cost > 0) then {
 		if (_cost <= dzn_market_accountCash) then {
 			_ctrl ctrlSetText format [
@@ -157,26 +157,26 @@ dzn_fnc_market_setPurchaseDialogText = {
 dzn_fnc_market_buttonYes = {
 	closeDialog 0;
 	
-	if (player getVariable "ArsenalInventoryCost" >= 0) then {		
-		if (player getVariable "ArsenalInventoryCost" <= dzn_market_accountCash) then {
-			[player, player getVariable "NewGear"] spawn dzn_fnc_gear_assignGear;
-			(player getVariable "ArsenalInventoryCost") call dzn_fnc_market_doPayment;
+	if (player getVariable "dzn_market_arsenalInventoryCost" >= 0) then {		
+		if (player getVariable "dzn_market_arsenalInventoryCost" <= dzn_market_accountCash) then {
+			[player, player getVariable "dzn_market_newGear"] spawn dzn_fnc_gear_assignGear;
+			(player getVariable "dzn_market_arsenalInventoryCost") call dzn_fnc_market_doPayment;
 			call dzn_fnc_market_getCurrentBalance;
 		};	
 	} else {
-		[player, player getVariable "NewGear"] spawn dzn_fnc_gear_assignGear;
-		(player getVariable "ArsenalInventoryCost") call dzn_fnc_market_doPayment;
+		[player, player getVariable "dzn_market_newGear"] spawn dzn_fnc_gear_assignGear;
+		(player getVariable "dzn_market_arsenalInventoryCost") call dzn_fnc_market_doPayment;
 		call dzn_fnc_market_getCurrentBalance;
 	};
-	player setVariable ["NewGear", nil];
-	player setVariable ["CurrentGear", nil];
+	player setVariable ["dzn_market_newGear", nil];
+	player setVariable ["dzn_market_currentGear", nil];
 };
 
 dzn_fnc_market_buttonNo = {
 	closeDialog 0;
 	
-	player setVariable ["NewGear", nil];
-	player setVariable ["CurrentGear", nil];
+	player setVariable ["dzn_market_newGear", nil];
+	player setVariable ["dzn_market_currentGear", nil];
 };
 
 
