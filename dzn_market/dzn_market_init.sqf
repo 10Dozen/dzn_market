@@ -6,7 +6,9 @@ dzn_market_accountCash = _this select 1;
 dzn_market_sellCoefficient = _this select 1;
 
 // Source where cash is stored. It may be variable on player, or even fucntion which return a value number.
-dzn_market_accountCashSource = { dzn_market_accountCash };
+dzn_market_getCashSource = { dzn_market_accountCash };
+// How to update cash: code which update cash at the source
+dzn_market_updateCashSource = { dzn_market_accountCash = dzn_market_accountCash + _this };
 
 // ****************************************************
 //	END OF PARAMETERS OF DZN_MARKET
