@@ -251,13 +251,10 @@ dzn_fnc_market_getItemPrice = {
 };
 
 dzn_fnc_market_isItemAvailable = {
-	// @Classname call dzn_fnc_market_isItemAvailable
-	private["_isAvailable"];
+	// @Boolean = @ItemList call dzn_fnc_market_isItemAvailable
+	// @ItemList = [@Classname, [@IsAvailable, @Cost]]
 	
-	_isAvailable = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
-	if (!isNil {_isAvailable} && {typename _isAvailable != "ARRAY"}) exitWith { false };
-	
-	(_isAvailable select 1)
+	(_this select 1) select 1
 };
 
 // ********************************
