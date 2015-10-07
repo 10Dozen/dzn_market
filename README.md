@@ -11,21 +11,21 @@ Arma 3 Arsenal Market System
 
 ##### dzn_fnc_market_updateMarketBox
 <tt>[ @Box, @ItemList] call dzn_fnc_addItemsToMarketBox;</tt>
-<tt>INPUT:</tt>
-<tt>0 (OBJECT)</tt> - ammo box where market arsenal will be added
-<tt>1 (ARRAY)</tt> - item list of market
+<br><tt>INPUT:</tt>
+<br><tt>0 (OBJECT)</tt> - ammo box where market arsenal will be added
+<br><tt>1 (ARRAY)</tt> - item list of market
 <br><br>Add arsenal market to given box with market's item list
 
 ##### dzn_fnc_market_addItemsToList
 <tt>[ [@Classname, [@Price, @Available], ... ] call dzn_fnc_market_addItemsToList;</tt>
-<tt>INPUT:</tt>
-<tt>0..n (ARRAY)</tt> - ItemLines to add to market item list (in format [ @Classname (String),[ @Price(Number),  @IsAvailable(Boolean)]] )
+<br><tt>INPUT:</tt>
+<br><tt>0..n (ARRAY)</tt> - ItemLines to add to market item list (in format [ @Classname (String),[ @Price(Number),  @IsAvailable(Boolean)]] )
 <br><br>Adds itemLine to market item list
 
 ##### dzn_fnc_market_addFreeItemsToList
 <tt>[ @ClassName, @ClassName2 ... ] call dzn_fnc_market_addFreeItemsToList;</tt>
-<tt>INPUT:</tt>
-<tt>0..n (STRING)</tt> - classnames of items
+<br><tt>INPUT:</tt>
+<br><tt>0..n (STRING)</tt> - classnames of items
 <br><br>Adds items with given classname as free available items to market item list
 
 ##### dzn_fnc_market_removeItemFromList
