@@ -1,4 +1,6 @@
+// ********************************
 // PAYMENT functions
+// ********************************
 dzn_fnc_market_doPayment = {
 	// @Value call dzn_fnc_market_doPayment
 	dzn_market_accountCash = dzn_market_accountCash - _this;
@@ -19,7 +21,9 @@ dzn_fnc_market_showAccount = {
 	];
 };
 
+// ********************************
 // DISPLAY functions
+// ********************************
 dzn_fnc_market_invTotals = {
 	// @ArrayOfTotals call dzn_fnc_showInvTotals
 	
@@ -179,8 +183,9 @@ dzn_fnc_market_buttonNo = {
 	player setVariable ["dzn_market_currentGear", nil];
 };
 
-
+// ********************************
 // ITEM LIST MANAGEMENT functions
+// ********************************
 dzn_fnc_market_updateMarketBox = {
 	// [ @Box, @ItemList] call dzn_fnc_addItemsToMarketBox;
 	private["_box","_itemsToAdd"];
@@ -188,7 +193,9 @@ dzn_fnc_market_updateMarketBox = {
 	_box = _this select 0;
 	_itemsToAdd = [];
 	{
-		_itemsToAdd pushBack (_x select 0);
+		if (_x call dzn_fnc_market_isItemAvailable) then {
+			_itemsToAdd pushBack (_x select 0);
+		};
 	} forEach (_this select 1);	
 	
 	[_box , (_box call BIS_fnc_getVirtualBackpackCargo)] call BIS_fnc_removeVirtualBackpackCargo;
@@ -233,7 +240,8 @@ dzn_fnc_market_removeItemFromList = {
 
 
 dzn_fnc_market_getItemPrice = {
-	// @Classname call dzn_fnc_market_getItemPrice
+	// @ItemLine call dzn_fnc_market_getItemPrice
+	
 	private["_price"];
 	
 	_price = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
@@ -252,7 +260,9 @@ dzn_fnc_market_isItemAvailable = {
 	(_isAvailable select 1)
 };
 
+// ********************************
 // CHECK INVENTORY during arsenal
+// ********************************
 dzn_fnc_convertInventoryToLine = {
 	// @InventoryArray call dzn_fnc_convertInventoryToLine
 	private[
