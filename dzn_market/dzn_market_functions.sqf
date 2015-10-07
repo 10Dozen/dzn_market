@@ -43,7 +43,7 @@ dzn_fnc_market_invTotals = {
 
 	{
 		_itemPrice = ((_x select 0) call dzn_fnc_market_getItemPrice) * (_x select 1);
-		_itemName = (_x select 0) call dzn_fnc_getItemName;
+		_itemName = (_x select 0) call dzn_fnc_getItemDisplayName;
 
 		_addCost = _addCost + _itemPrice;
 		_stringsToShow = _stringsToShow + [
@@ -67,7 +67,7 @@ dzn_fnc_market_invTotals = {
 
 	{
 		_itemPrice = round(((_x select 0) call dzn_fnc_market_getItemPrice) * (_x select 1) * dzn_market_sellCoefficient);
-		_itemName = (_x select 0) call dzn_fnc_getItemName;
+		_itemName = (_x select 0) call dzn_fnc_getItemDisplayName;
 		
 		_sellCost = _sellCost + _itemPrice;
 		_stringsToShow = _stringsToShow + [
@@ -180,7 +180,6 @@ dzn_fnc_market_buttonNo = {
 };
 
 
-
 // ITEM LIST MANAGEMENT functions
 dzn_fnc_market_updateMarketBox = {
 	// [ @Box, @ItemList] call dzn_fnc_addItemsToMarketBox;
@@ -222,6 +221,7 @@ dzn_fnc_market_addFreeItemsToList = {
 dzn_fnc_market_removeItemFromList = {
 	// @Classname call dzn_fnc_market_removeItemFromList
 	private["_idx"];
+	
 	_idx = -1;
 	{ 
 		if (_x select 0 == _this) exitWith {_idx = _forEachIndex; };
@@ -235,6 +235,7 @@ dzn_fnc_market_removeItemFromList = {
 dzn_fnc_market_getItemPrice = {
 	// @Classname call dzn_fnc_market_getItemPrice
 	private["_price"];
+	
 	_price = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
 	if (!isNil {_price} && {typename _price != "ARRAY"}) exitWith { 0 };
 	
@@ -244,18 +245,21 @@ dzn_fnc_market_getItemPrice = {
 dzn_fnc_market_isItemAvailable = {
 	// @Classname call dzn_fnc_market_isItemAvailable
 	private["_isAvailable"];
+	
 	_isAvailable = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
 	if (!isNil {_isAvailable} && {typename _isAvailable != "ARRAY"}) exitWith { false };
 	
 	(_isAvailable select 1)
 };
 
-
-
 // CHECK INVENTORY during arsenal
 dzn_fnc_convertInventoryToLine = {
 	// @InventoryArray call dzn_fnc_convertInventoryToLine
-	private["_line","_cat","_subCat"];
+	private[
+		"_line"
+		,"_cat"
+		,"_subCat"
+	];
 	#define	linePush(X)		if (_x != "") then {_line pushBack X;};
 	_line = [];
 	{
@@ -281,7 +285,17 @@ dzn_fnc_convertInventoryToLine = {
 
 dzn_fnc_getChangedInvItems = {
 	// [@InvToCheck, @BaseInv] call dzn_fnc_getChangedInvItems;
-	private["_curInv","_baseInv","_changed","_removed","_cItems","_rItems","_item","_itemCount","_rItemCount"];
+	private[
+		"_curInv"
+		,"_baseInv"
+		,"_changed"
+		,"_removed"
+		,"_cItems"
+		,"_rItems"
+		,"_item"
+		,"_itemCount"
+		,"_rItemCount"
+	];
 	
 	_curInv = (_this select 0) call BIS_fnc_consolidateArray;
 	_baseInv = (_this select 1) call BIS_fnc_consolidateArray;
@@ -316,110 +330,4 @@ dzn_fnc_getChangedInvItems = {
 	} forEach _removed;
 	
 	[_cItems, _rItems]
-};
-
-
-
-// DISPLAY NAME iof Weapon or Gear
-dzn_fnc_getItemName = {
-	// @Classname call dzn_fnc_getItemName
-	private["_name"];
-	
-	_name = _this call dzn_fnc_getEquipDisplayName;
-	if (_name == "") then {
-		_name = _this call dzn_fnc_getMagazineDisplayName;
-		if (_name == "") then {
-			_name = _this call dzn_fnc_getBackpackDisplayName;
-		};
-	};
-
-	_name	
-};
-
-dzn_fnc_getMagazineDisplayName = {
-	private ["_cfgMagazines","_output","_item"];
-	_cfgMagazines = ("isclass _x && getnumber (_x >> 'scope') == 2 && getText (_x >> 'picture') != ''") configclasses (configfile >> "cfgMagazines");
-	
-	_output = "";
-	for "_i" from 0 to (count _cfgMagazines)-1 do {
-		_item = _cfgMagazines select _i;			
-		if (  configName(_item) == _this ) then {
-			_output = getText(configFile >> "cfgMagazines" >> configName(_item) >> "displayName");
-		};
-	};
-	
-	_output
-};
-
-dzn_fnc_getEquipDisplayName = {
-	private ["_cfgWeapon","_cfgGlasses","_output","_item"];	
-	_cfgWeapon = ("isclass _x && getnumber (_x >> 'scope') == 2 ") configclasses (configfile >> "cfgWeapons");
-	_cfgGlasses = ("isclass _x && getnumber (_x >> 'scope') == 2 ") configclasses (configfile >> "CfgGlasses");
-	_output = "";
-	
-	for "_i" from 0 to (count _cfgWeapon)-1 do {
-		_item = _cfgWeapon select _i;			
-		if (  configName(_item) == _this ) then {
-			_output = getText(configFile >> "cfgWeapons" >> configName(_item) >> "displayName");
-		};
-	};
-	
-	if (_output == "") then {		
-		for "_i" from 0 to (count _cfgGlasses)-1 do {
-			_item = _cfgGlasses select _i;			
-			if (  configName(_item) == _this ) then {
-				_output = getText(configFile >> "cfgGlasses" >> configName(_item) >> "displayName");
-			};
-		};
-	};
-
-	_output
-};
-dzn_fnc_getBackpackDisplayName = {
-	private ["_cfg","_output","_item"];		
-	_cfgVehicles = ("isclass _x && !(getArray (_x >> 'allowedSlots') isEqualTo [])") configclasses (configfile >> "cfgVehicles");
-	_output = "";
-	
-	for "_i" from 0 to (count _cfgVehicles)-1 do {
-		_item = _cfgWeapon select _i;			
-		if (  configName(_item) == _this ) then {
-			_output = getText(configFile >> "_cfgVehicles" >> configName(_item) >> "displayName");
-		};
-	};
-	_output
-};
-dzn_fnc_getWeaponDisplayName = {
-	private ["_cfgWeapons","_output","_item"];
-	_cfgWeapons = ("isclass _x && getnumber (_x >> 'scope') == 2 ") configclasses (configfile >> "cfgWeapons");
-	
-	_output = "";
-	for "_i" from 0 to (count _cfgWeapons)-1 do {
-		_item = _cfgWeapons select _i;			
-		if (  configName(_item) == _this ) then {
-			_output = getText(configFile >> "cfgWeapons" >> configName(_item) >> "displayName");
-		};
-	};
-	
-	_output
-};
-
-
-// GET VALUE BY KEY
-dzn_fnc_getValueByKey = {
-	// [@Array, @Key] call dzn_fnc_getValueByKey
-	private["_output","_default"];
-	_default = "@Wrong key";
-	_output = _default;
-	
-	{
-		if ( [_this select 1, _x select 0] call BIS_fnc_areEqual ) exitWith { _output = _x select 1; };
-	} forEach (_this select 0);
-	
-	if (typename _output == typename _default && {_output == _default}) then { 
-		// hintSilent format ["dzn_fnc_getValueByKey :: Failed to find %1 key. Will return FALSE.", str(_this select 1)];
-		// diag_log format ["dzn_fnc_getValueByKey :: Failed to find %1 key. Will return FALSE.", str(_this select 1)];
-		_output = false;
-	};
-	
-	_output
 };
