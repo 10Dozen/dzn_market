@@ -159,12 +159,12 @@ dzn_fnc_market_buttonYes = {
 	
 	if (player getVariable "dzn_market_arsenalInventoryCost" >= 0) then {		
 		if (player getVariable "dzn_market_arsenalInventoryCost" <= dzn_market_accountCash) then {
-			[player, player getVariable "dzn_market_newGear"] spawn dzn_fnc_gear_assignGear;
+			[player, player getVariable "dzn_market_newGear"] spawn dzn_fnc_gear_setPreciseGear;
 			(player getVariable "dzn_market_arsenalInventoryCost") call dzn_fnc_market_doPayment;
 			call dzn_fnc_market_getCurrentBalance;
 		};	
 	} else {
-		[player, player getVariable "dzn_market_newGear"] spawn dzn_fnc_gear_assignGear;
+		[player, player getVariable "dzn_market_newGear"] spawn dzn_fnc_gear_setPreciseGear;
 		(player getVariable "dzn_market_arsenalInventoryCost") call dzn_fnc_market_doPayment;
 		call dzn_fnc_market_getCurrentBalance;
 	};
