@@ -1,7 +1,16 @@
-// Properties
-dzn_market_accountCash = _this select 0;
+// ****************************************************
+//	PARAMETERS OF DZN_MARKET
+// ****************************************************
+
+dzn_market_accountCash = _this select 1;
 dzn_market_sellCoefficient = _this select 1;
 
+// Source where cash is stored. It may be variable on player, or even fucntion which return a value number.
+dzn_market_accountCashSource = { dzn_market_accountCash };
+
+// ****************************************************
+//	END OF PARAMETERS OF DZN_MARKET
+// ****************************************************
 
 
 // Include functions
@@ -10,23 +19,13 @@ dzn_market_sellCoefficient = _this select 1;
 // Include functions
 #include "dzn_market_functions.sqf"
 
-
-
-
-[
-	marketBox, 
-	["FirstAidKit"], 
-	true,
-	true
-] call BIS_fnc_addVirtualItemCargo;
-
+[marketBox, ["FirstAidKit"], true, true] call BIS_fnc_addVirtualItemCargo;
 [marketBox, dzn_market_itemList] call dzn_fnc_market_updateMarketBox;
 
-	
-	
-waitUntil {!isNil "dzn_fnc_gear_getGear" && !isNil "dzn_fnc_gear_assignGear"};
-player setVariable ["ArsenalOpened",false];
-player setVariable ["ArsenalTimer",time + 1];
+waitUntil {!isNil "dzn_gear_initialized" && { dzn_gear_initialized }};
+player setVariable ["dzn_market_arsenalOpened",false];
+player setVariable ["dzn_market_arsenalTimer",time + 1];
+player setVariable ["dzn_market_cashSyncTimer",time + 300];
 
 [] spawn {
 	["arsenal", "onEachFrame", {
@@ -58,5 +57,17 @@ player setVariable ["ArsenalTimer",time + 1];
 				};				
 			};
 		};
+		
+		if (time > player getVariable "market_CashSyncTimer") then {
+			player setVariable ["market_CashSyncTimer",time + 300];
+			
+			[(player getVariable "squadLogic") getVariable (name player), "cash", dzn_market_accountCash] call dzn_fnc_setValueByKey;
+			(player getVariable "squadLogic") setVariable [
+				name player
+				,(player getVariable "squadLogic")  getVariable (name player)
+				,true
+			];
+		};
+		
 	}] call BIS_fnc_addStackedEventHandler;
 };
