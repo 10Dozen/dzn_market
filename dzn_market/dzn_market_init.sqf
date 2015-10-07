@@ -65,13 +65,7 @@ player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerD
 		
 		if (time > player getVariable "dzn_market_cashSyncTimer") then {
 			player setVariable ["dzn_market_cashSyncTimer",time + dzn_market_cashSyncTimerDelay];
-			
-			[(player getVariable "squadLogic") getVariable (name player), "cash", dzn_market_accountCash] call dzn_fnc_setValueByKey;
-			(player getVariable "squadLogic") setVariable [
-				name player
-				,(player getVariable "squadLogic")  getVariable (name player)
-				,true
-			];
+			dzn_market_accountCash call dzn_market_updateCashSource;
 		};
 		
 	}] call BIS_fnc_addStackedEventHandler;
