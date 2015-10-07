@@ -33,7 +33,7 @@ player setVariable ["dzn_market_arsenalTimer", time + 1];
 player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerDelay];
 
 [] spawn {
-	["arsenal", "onEachFrame", {
+	["dzn_market_arsenal", "onEachFrame", {
 		if !(isNull ( uinamespace getvariable "RSCDisplayArsenal" )) then {
 			if !(player getVariable "dzn_market_arsenalOpened") then {
 				player setVariable ["dzn_market_arsenalOpened",true];
