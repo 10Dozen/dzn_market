@@ -21,6 +21,179 @@ dzn_fnc_market_showAccount = {
 	];
 };
 
+
+// ********************************
+// ITEM LIST MANAGEMENT functions
+// ********************************
+dzn_fnc_market_updateMarketBox = {
+	// [ @Box, @ItemList] call dzn_fnc_addItemsToMarketBox;
+	private["_box","_itemsToAdd"];
+	
+	_box = _this select 0;
+	_itemsToAdd = [];
+	{
+		if (_x call dzn_fnc_market_isItemAvailable) then {
+			_itemsToAdd pushBack (_x select 0);
+		};
+	} forEach (_this select 1);	
+	
+	[_box , (_box call BIS_fnc_getVirtualBackpackCargo)] call BIS_fnc_removeVirtualBackpackCargo;
+	[_box , (_box call BIS_fnc_getVirtualItemCargo)] call BIS_fnc_removeVirtualItemCargo;
+	[_box , (_box call BIS_fnc_getVirtualWeaponCargo)] call BIS_fnc_removeVirtualWeaponCargo;
+	[_box , (_box call BIS_fnc_getVirtualMagazineCargo)] call BIS_fnc_removeVirtualMagazineCargo;
+	
+	[_box, _itemsToAdd, true, false] call BIS_fnc_addVirtualBackpackCargo;
+	[_box, _itemsToAdd, true,false] call BIS_fnc_addVirtualItemCargo;
+	[_box, _itemsToAdd, true, false] call BIS_fnc_addVirtualWeaponCargo;
+	[_box, _itemsToAdd, true, false] call BIS_fnc_addVirtualMagazineCargo;
+};
+
+dzn_fnc_market_addItemsToList = {
+	// [ [@Classname, [@Price, @Available], ... ] call dzn_fnc_market_addItemsToList;
+	{
+		if (typename _x == "ARRAY" && {typename (_x select 0) == "STRING"}) then {
+			dzn_market_itemList pushBack _x;
+		};
+	} forEach _this;
+};
+
+dzn_fnc_market_addFreeItemsToList = {
+	// [ @ClassName, @ClassName2 ... ] call dzn_fnc_market_addFreeItemsToList;
+	{
+		dzn_market_itemList pushBack [_x, [0, true]];	
+	} forEach _this;
+};
+
+dzn_fnc_market_removeItemFromList = {
+	// @Classname call dzn_fnc_market_removeItemFromList
+	private["_idx"];
+	
+	_idx = -1;
+	{ 
+		if (_x select 0 == _this) exitWith {_idx = _forEachIndex; };
+	} forEach dzn_market_itemList;
+	
+	dzn_market_itemList set [_idx, -1];
+	dzn_market_itemList = dzn_market_itemList - [-1];
+};
+
+dzn_fnc_market_getItemPrice = {
+	// @ItemLine call dzn_fnc_market_getItemPrice
+	
+	private["_price"];
+	
+	_price = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
+	if (!isNil {_price} && {typename _price != "ARRAY"}) exitWith { 0 };
+	
+	(_price select 0)
+};
+
+dzn_fnc_market_isItemAvailable = {
+	// @Boolean = @ItemList call dzn_fnc_market_isItemAvailable
+	// @ItemList = [@Classname, [@IsAvailable, @Cost]]
+	
+	(_this select 1) select 1
+};
+
+dzn_fnc_market_setItemPrice = {
+	// [@Classname, @Price] call dzn_fnc_market_setItemPrice
+	private["_itemParams"];
+	_itemParams = [dzn_market_itemList, _this select 0] call dzn_fnc_getValueByKey;
+	
+	[dzn_market_itemList, _this select 0, [_this select 1, _itemParams select 1]] call dzn_fnc_setValueByKey;
+};
+
+dzn_fnc_market_setItemAvailable = {
+	// [@Classname, @isAvailable] call dzn_fnc_market_setItemAvailable
+	private["_itemParams"];
+	_itemParams = [dzn_market_itemList, _this select 0] call dzn_fnc_getValueByKey;
+	
+	[dzn_market_itemList, _this select 0, [_itemParams select 0, _this select 1]] call dzn_fnc_setValueByKey;
+};
+
+// ********************************
+// CHECK INVENTORY during arsenal
+// ********************************
+dzn_fnc_convertInventoryToLine = {
+	// @InventoryArray call dzn_fnc_convertInventoryToLine
+	private[
+		"_line"
+		,"_cat"
+		,"_subCat"
+	];
+	#define	linePush(X)		if (_x != "") then {_line pushBack X;};
+	_line = [];
+	{
+		_cat = _x;
+		if (typename _cat == "ARRAY") then {
+			{
+				_subCat = _x;
+				if (typename _subCat == "ARRAY") then {
+					{
+						linePush(_x)
+					} forEach _subCat;
+				} else {
+					linePush(_x)
+				};
+			} forEach _cat;
+		} else {
+			linePush(_x)
+		};
+	} forEach _this;
+	
+	_line
+};
+
+dzn_fnc_getChangedInvItems = {
+	// [@InvToCheck, @BaseInv] call dzn_fnc_getChangedInvItems;
+	private[
+		"_curInv"
+		,"_baseInv"
+		,"_changed"
+		,"_removed"
+		,"_cItems"
+		,"_rItems"
+		,"_item"
+		,"_itemCount"
+		,"_rItemCount"
+	];
+	
+	_curInv = (_this select 0) call BIS_fnc_consolidateArray;
+	_baseInv = (_this select 1) call BIS_fnc_consolidateArray;
+	
+	if (_curInv isEqualTo _baseInv) exitWith { [] };
+
+	_changed = _curInv - _baseInv;
+	_removed = _baseInv - _curInv;
+	
+	_cItems = [];
+	_rItems = [];
+	
+	{
+		_item = _x select 0;
+		_itemCount = _x select 1;
+		_rItemCount = [_removed, _item] call dzn_fnc_getValueByKey;
+		if (typename _rItemCount != "BOOL") then {
+			if (_itemCount > _rItemCount) then {
+				_cItems pushBack [_item, _itemCount - _rItemCount];
+			} else {
+				_rItems pushBack [_item, _rItemCount - _itemCount];
+			};
+		} else {
+			_cItems pushBack _x;
+		};
+	} forEach _changed;
+	
+	{
+		if (typename ([_changed, _x select 0] call dzn_fnc_getValueByKey) == "BOOL") then {
+			_rItems pushBack _x;
+		};			
+	} forEach _removed;
+	
+	[_cItems, _rItems]
+};
+
+
 // ********************************
 // DISPLAY functions
 // ********************************
@@ -181,160 +354,4 @@ dzn_fnc_market_buttonNo = {
 	
 	player setVariable ["dzn_market_newGear", nil];
 	player setVariable ["dzn_market_currentGear", nil];
-};
-
-// ********************************
-// ITEM LIST MANAGEMENT functions
-// ********************************
-dzn_fnc_market_updateMarketBox = {
-	// [ @Box, @ItemList] call dzn_fnc_addItemsToMarketBox;
-	private["_box","_itemsToAdd"];
-	
-	_box = _this select 0;
-	_itemsToAdd = [];
-	{
-		if (_x call dzn_fnc_market_isItemAvailable) then {
-			_itemsToAdd pushBack (_x select 0);
-		};
-	} forEach (_this select 1);	
-	
-	[_box , (_box call BIS_fnc_getVirtualBackpackCargo)] call BIS_fnc_removeVirtualBackpackCargo;
-	[_box , (_box call BIS_fnc_getVirtualItemCargo)] call BIS_fnc_removeVirtualItemCargo;
-	[_box , (_box call BIS_fnc_getVirtualWeaponCargo)] call BIS_fnc_removeVirtualWeaponCargo;
-	[_box , (_box call BIS_fnc_getVirtualMagazineCargo)] call BIS_fnc_removeVirtualMagazineCargo;
-	
-	[_box, _itemsToAdd, true, false] call BIS_fnc_addVirtualBackpackCargo;
-	[_box, _itemsToAdd, true,false] call BIS_fnc_addVirtualItemCargo;
-	[_box, _itemsToAdd, true, false] call BIS_fnc_addVirtualWeaponCargo;
-	[_box, _itemsToAdd, true, false] call BIS_fnc_addVirtualMagazineCargo;
-};
-
-dzn_fnc_market_addItemsToList = {
-	// [ [@Classname, [@Price, @Available], ... ] call dzn_fnc_market_addItemsToList;
-	{
-		if (typename _x == "ARRAY" && {typename (_x select 0) == "STRING"}) then {
-			dzn_market_itemList pushBack _x;
-		};
-	} forEach _this;
-};
-
-dzn_fnc_market_addFreeItemsToList = {
-	// [ @ClassName, @ClassName2 ... ] call dzn_fnc_market_addFreeItemsToList;
-	{
-		dzn_market_itemList pushBack [_x, [0, true]];	
-	} forEach _this;
-};
-
-dzn_fnc_market_removeItemFromList = {
-	// @Classname call dzn_fnc_market_removeItemFromList
-	private["_idx"];
-	
-	_idx = -1;
-	{ 
-		if (_x select 0 == _this) exitWith {_idx = _forEachIndex; };
-	} forEach dzn_market_itemList;
-	
-	dzn_market_itemList set [_idx, -1];
-	dzn_market_itemList = dzn_market_itemList - [-1];
-};
-
-
-dzn_fnc_market_getItemPrice = {
-	// @ItemLine call dzn_fnc_market_getItemPrice
-	
-	private["_price"];
-	
-	_price = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
-	if (!isNil {_price} && {typename _price != "ARRAY"}) exitWith { 0 };
-	
-	(_price select 0)
-};
-
-dzn_fnc_market_isItemAvailable = {
-	// @Boolean = @ItemList call dzn_fnc_market_isItemAvailable
-	// @ItemList = [@Classname, [@IsAvailable, @Cost]]
-	
-	(_this select 1) select 1
-};
-
-// ********************************
-// CHECK INVENTORY during arsenal
-// ********************************
-dzn_fnc_convertInventoryToLine = {
-	// @InventoryArray call dzn_fnc_convertInventoryToLine
-	private[
-		"_line"
-		,"_cat"
-		,"_subCat"
-	];
-	#define	linePush(X)		if (_x != "") then {_line pushBack X;};
-	_line = [];
-	{
-		_cat = _x;
-		if (typename _cat == "ARRAY") then {
-			{
-				_subCat = _x;
-				if (typename _subCat == "ARRAY") then {
-					{
-						linePush(_x)
-					} forEach _subCat;
-				} else {
-					linePush(_x)
-				};
-			} forEach _cat;
-		} else {
-			linePush(_x)
-		};
-	} forEach _this;
-	
-	_line
-};
-
-dzn_fnc_getChangedInvItems = {
-	// [@InvToCheck, @BaseInv] call dzn_fnc_getChangedInvItems;
-	private[
-		"_curInv"
-		,"_baseInv"
-		,"_changed"
-		,"_removed"
-		,"_cItems"
-		,"_rItems"
-		,"_item"
-		,"_itemCount"
-		,"_rItemCount"
-	];
-	
-	_curInv = (_this select 0) call BIS_fnc_consolidateArray;
-	_baseInv = (_this select 1) call BIS_fnc_consolidateArray;
-	
-	if (_curInv isEqualTo _baseInv) exitWith { [] };
-
-	_changed = _curInv - _baseInv;
-	_removed = _baseInv - _curInv;
-	
-	_cItems = [];
-	_rItems = [];
-	
-	{
-		_item = _x select 0;
-		_itemCount = _x select 1;
-		_rItemCount = [_removed, _item] call dzn_fnc_getValueByKey;
-		if (typename _rItemCount != "BOOL") then {
-			if (_itemCount > _rItemCount) then {
-				_cItems pushBack [_item, _itemCount - _rItemCount];
-			} else {
-				_rItems pushBack [_item, _rItemCount - _itemCount];
-			};
-		} else {
-			_cItems pushBack _x;
-		};
-	} forEach _changed;
-	
-	{
-		if (typename ([_changed, _x select 0] call dzn_fnc_getValueByKey) == "BOOL") then {
-			_rItems pushBack _x;
-		};			
-	} forEach _removed;
-	
-	[_cItems, _rItems]
 };
