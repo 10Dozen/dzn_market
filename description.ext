@@ -1,2 +1,19 @@
 #include "defines.hpp"
 #include "dialogs.hpp"
+
+
+// =======================================================
+// ============= DZN_ATC Comm Menu Section ===============
+// =======================================================
+class CfgCommunicationMenu
+{
+    class dzn_market_cashShareMenu
+    {
+        text = "Cash Share";
+        icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\transport_ca.paa";
+        expression = "player setVariable ['dzn_market_openedShareMenu', true];";
+        enable = "1";
+        removeAfterExpressionCall = 0;
+    };
+};
+// ============= END of DZN_ATC Comm Menu Section ===============
