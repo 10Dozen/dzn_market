@@ -355,6 +355,7 @@ dzn_fnc_market_buttonNo = {
 	player setVariable ["dzn_market_currentGear", nil];
 };
 
+
 // ********************************
 // SHARE functions
 // ********************************
@@ -367,8 +368,6 @@ dzn_market_shareMenuValue = [
 	,["$5000", [5], "#USER:dzn_market_shareMenu5000", -5, [], "1", "1"]
 	,["$10000", [6], "#USER:dzn_market_shareMenu10000", -5, [], "1", "1"]
 	,["$20000", [7], "#USER:dzn_market_shareMenu20000", -5, [], "1", "1"]
-	
-	// ,["Dozen",[2],"",-5,[["expression", format ['player setVariable ["dzn_atc_called", "%1"];', 1] ]],"1","1"]
 ];
 
 dzn_fnc_market_constructMenus = {
@@ -382,16 +381,18 @@ dzn_fnc_market_constructMenus = {
 
 dzn_fnc_market_constructShareToPlayerMenu = {
 	// @Menu = @Summ call dzn_fnc_market_constructShareToPlayerMenu
-	
-	_menu = [ [format ["Share $%1", _this], false] ];
+	private["_cashToShare","_menu"];
+	_cashToShare = _this;
+	_menu = [ [format ["Share $%1", _cashToShare], false] ];
 	{
 		if (side player == side _x /*&& !(player == _x)*/) then {
+			_playersList pushBack _x;
 			_menu pushBack [
 				name _x
 				, []
 				, ""
 				, -5
-				,[["expression", "hint 'kek';" ]]
+				,[["expression", format ["[%1, %2] call dzn_fnc_market_shareCashMP;", _x, _cashToShare] ]]
 				,"1"
 				,"1"
 			];
@@ -400,12 +401,18 @@ dzn_fnc_market_constructShareToPlayerMenu = {
 	
 	_menu
 };
-/*
-dzn_market_shareMenu500 = [
-	["Share $500", false]
-	,["Dozen",[],"",-5,[["expression", format ['player setVariable ["dzn_atc_called", "%1"];', 1] ]],"1","1"]
-];
-*/
+
+dzn_fnc_market_shareCashMP = {
+	params["_recepient","_cash"];
+	dzn_market_accountCash = dzn_market_accountCash - _cash;
+	[_cash,"dzn_fnc_market_receiveCash",_recepient,false,false] call BIS_fnc_MP;
+};
+
+dzn_fnc_market_receiveCash = {
+	// @Cash call dzn_fnc_market_receiveCash
+	dzn_market_accountCash = dzn_market_accountCash + _this;
+};
+
 
 [player,"dzn_market_cashShareMenu"] call BIS_fnc_addCommMenuItem;
 player setVariable ["dzn_market_openedShareMenu", false];
@@ -415,12 +422,5 @@ player setVariable ["dzn_market_openedShareMenu", false];
 		player setVariable ["dzn_market_openedShareMenu", false];
 		call dzn_fnc_market_constructMenus;
 		showCommandingMenu "#USER:dzn_market_shareMenuValue";
-	};
-		
-	if !isNil {player getVariable "dzn_atc_called"} then {
-		_classname = player getVariable "dzn_atc_called";
-		player setVariable ["dzn_atc_called", nil];
-		
-		_classname call dzn_atc_fnc_callAirTaxi;
 	};
 }] call BIS_fnc_addStackedEventHandler;	
