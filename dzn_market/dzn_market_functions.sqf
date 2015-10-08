@@ -77,15 +77,14 @@ dzn_fnc_market_removeItemFromList = {
 	dzn_market_itemList = dzn_market_itemList - [-1];
 };
 
+
 dzn_fnc_market_getItemPrice = {
-	// @ItemLine call dzn_fnc_market_getItemPrice
+	// @ItemLine call dzn_fnc_market_getItemPrice	
+	private["_itemLine"];
+	_itemLine = [dzn_market_itemList,_this] call dzn_fnc_getValueByKey;	
+	if (typename _itemLine == "BOOL") exitWith { 0 };
 	
-	private["_price"];
-	
-	_price = [dzn_market_itemList, _this] call dzn_fnc_getValueByKey;
-	if (!isNil {_price} && {typename _price != "ARRAY"}) exitWith { 0 };
-	
-	(_price select 0)
+	(_itemLine select 0)
 };
 
 dzn_fnc_market_isItemAvailable = {
