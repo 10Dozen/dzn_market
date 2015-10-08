@@ -354,3 +354,73 @@ dzn_fnc_market_buttonNo = {
 	player setVariable ["dzn_market_newGear", nil];
 	player setVariable ["dzn_market_currentGear", nil];
 };
+
+// ********************************
+// SHARE functions
+// ********************************
+
+dzn_market_shareMenuValue = [
+	["Share", false]
+	,["$500", [2], "#USER:dzn_market_shareMenu500", -5, [], "1", "1"]
+	,["$1000", [3], "#USER:dzn_market_shareMenu1000", -5, [], "1", "1"]
+	,["$2000", [4], "#USER:dzn_market_shareMenu2000", -5, [], "1", "1"]
+	,["$5000", [5], "#USER:dzn_market_shareMenu5000", -5, [], "1", "1"]
+	,["$10000", [6], "#USER:dzn_market_shareMenu10000", -5, [], "1", "1"]
+	,["$20000", [7], "#USER:dzn_market_shareMenu20000", -5, [], "1", "1"]
+	
+	// ,["Dozen",[2],"",-5,[["expression", format ['player setVariable ["dzn_atc_called", "%1"];', 1] ]],"1","1"]
+];
+
+dzn_fnc_market_constructMenus = {
+	{
+		call compile format [
+			"dzn_market_shareMenu%1 = %1 call dzn_fnc_market_constructShareToPlayerMenu;"
+			,_x
+		];
+	} forEach [500,1000,2000,5000,10000,20000];
+};
+
+dzn_fnc_market_constructShareToPlayerMenu = {
+	// @Menu = @Summ call dzn_fnc_market_constructShareToPlayerMenu
+	
+	_menu = [ [format ["Share $%1", _this], false] ];
+	{
+		if (side player == side _x /*&& !(player == _x)*/) then {
+			_menu pushBack [
+				name _x
+				, []
+				, ""
+				, -5
+				,[["expression", "hint 'kek';" ]]
+				,"1"
+				,"1"
+			];
+		};
+	} forEach (call BIS_fnc_listPlayers);
+	
+	_menu
+};
+/*
+dzn_market_shareMenu500 = [
+	["Share $500", false]
+	,["Dozen",[],"",-5,[["expression", format ['player setVariable ["dzn_atc_called", "%1"];', 1] ]],"1","1"]
+];
+*/
+
+[player,"dzn_market_cashShareMenu"] call BIS_fnc_addCommMenuItem;
+player setVariable ["dzn_market_openedShareMenu", false];
+
+["dzn_market_checkMenu", "onEachFrame", {
+	if (player getVariable "dzn_market_openedShareMenu") then {
+		player setVariable ["dzn_market_openedShareMenu", false];
+		call dzn_fnc_market_constructMenus;
+		showCommandingMenu "#USER:dzn_market_shareMenuValue";
+	};
+		
+	if !isNil {player getVariable "dzn_atc_called"} then {
+		_classname = player getVariable "dzn_atc_called";
+		player setVariable ["dzn_atc_called", nil];
+		
+		_classname call dzn_atc_fnc_callAirTaxi;
+	};
+}] call BIS_fnc_addStackedEventHandler;	
