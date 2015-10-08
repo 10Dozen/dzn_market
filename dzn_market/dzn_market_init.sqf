@@ -2,14 +2,12 @@
 //	PARAMETERS OF DZN_MARKET
 // ****************************************************
 
-accountCash = 25000;
-
 // Source where cash is stored. It may be variable on player, or even fucntion which return a value number.
-dzn_market_getCashSource = { accountCash };
+dzn_market_getCashSource = { playerCash };
 // How to update cash: code which update cash at the source
-dzn_market_updateCashSource = { accountCash = accountCash + _this };
+dzn_market_updateCashSource = { playerCash = dzn_market_accountCash; };
 
-dzn_market_cashSyncTimerDelay = 300;
+dzn_market_cashSyncTimerDelay = 10;
 
 dzn_market_accountCash = call dzn_market_getCashSource;
 dzn_market_sellCoefficient = _this select 0;
@@ -55,7 +53,7 @@ player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerD
 				};
 			};
 		} else {
-			if (player getVariable "ArsenalOpened") then {
+			if (player getVariable "dzn_market_arsenalOpened") then {
 				player setVariable ["dzn_market_arsenalOpened",false];				
 				player setVariable ["dzn_market_newGear", (player call dzn_fnc_gear_getPreciseGear)];
 				
