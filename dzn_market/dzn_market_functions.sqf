@@ -6,6 +6,12 @@ dzn_fnc_market_doPayment = {
 	dzn_market_accountCash = dzn_market_accountCash - _this;
 };
 
+dzn_fnc_market_receiveCash = {
+	// @Cash call dzn_fnc_market_receiveCash
+	dzn_market_accountCash = dzn_market_accountCash + _this;
+	call dzn_fnc_market_showAccount;
+};
+
 dzn_fnc_market_getCurrentBalance = {
 	if (dzn_market_accountCash > 0) then {
 		hint parseText format ["<t color='#99CC00' align='center'>BALANCE:</t><br /><t color='#99CC00'>%1 $</t>", dzn_market_accountCash];
@@ -360,7 +366,7 @@ dzn_fnc_market_buttonNo = {
 // SHARE functions
 // ********************************
 
-dzn_market_shareMenuValue = [
+dzn_market_shareMenuAmount = [
 	["Share", false]
 	,["$500", [2], "#USER:dzn_market_shareMenu500", -5, [], "1", "1"]
 	,["$1000", [3], "#USER:dzn_market_shareMenu1000", -5, [], "1", "1"]
@@ -406,21 +412,7 @@ dzn_fnc_market_shareCashMP = {
 	params["_recepient","_cash"];
 	dzn_market_accountCash = dzn_market_accountCash - _cash;
 	[_cash,"dzn_fnc_market_receiveCash",_recepient,false,false] call BIS_fnc_MP;
+	
+	player sideChat format ["$%1 is transferred to %2's account.", _cash, _recepient];
+	call dzn_fnc_market_showAccount;
 };
-
-dzn_fnc_market_receiveCash = {
-	// @Cash call dzn_fnc_market_receiveCash
-	dzn_market_accountCash = dzn_market_accountCash + _this;
-};
-
-
-[player,"dzn_market_cashShareMenu"] call BIS_fnc_addCommMenuItem;
-player setVariable ["dzn_market_openedShareMenu", false];
-
-["dzn_market_checkMenu", "onEachFrame", {
-	if (player getVariable "dzn_market_openedShareMenu") then {
-		player setVariable ["dzn_market_openedShareMenu", false];
-		call dzn_fnc_market_constructMenus;
-		showCommandingMenu "#USER:dzn_market_shareMenuValue";
-	};
-}] call BIS_fnc_addStackedEventHandler;	
