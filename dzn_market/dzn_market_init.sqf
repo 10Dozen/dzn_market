@@ -32,6 +32,7 @@ waitUntil {!isNil "dzn_gear_initialized" && { dzn_gear_initialized }};
 player setVariable ["dzn_market_arsenalOpened", false];
 player setVariable ["dzn_market_arsenalTimer", time + 1];
 player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerDelay];
+player ыetVariable ["dzn_market_openedShareMenu", false];
 
 [] spawn {
 	["dzn_market_arsenal", "onEachFrame", {
@@ -69,5 +70,10 @@ player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerD
 			dzn_market_accountCash call dzn_market_updateCashSource;
 		};
 		
+		if (player getVariable "dzn_market_openedShareMenu") then {
+			player setVariable ["dzn_market_openedShareMenu", false];
+			call dzn_fnc_market_constructMenus;
+			showCommandingMenu "#USER:dzn_market_shareMenuAmount";
+		};
 	}] call BIS_fnc_addStackedEventHandler;
 };
