@@ -33,6 +33,7 @@ player setVariable ["dzn_market_arsenalOpened", false];
 player setVariable ["dzn_market_arsenalTimer", time + 1];
 player setVariable ["dzn_market_cashSyncTimer", time + dzn_market_cashSyncTimerDelay];
 player ыetVariable ["dzn_market_openedShareMenu", false];
+[player,"dzn_market_cashShareMenu"] call BIS_fnc_addCommMenuItem;
 
 [] spawn {
 	["dzn_market_arsenal", "onEachFrame", {
